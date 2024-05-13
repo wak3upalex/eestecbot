@@ -1,5 +1,3 @@
-# I want to create a Python telegram bot,which will use aiogram library and  will say hello on each message
-
 from aiogram import Bot, Dispatcher
 from dotenv import load_dotenv
 import os
