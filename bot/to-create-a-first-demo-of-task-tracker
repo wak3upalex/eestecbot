@@ -451,6 +451,11 @@ async def process_mytasks_command(message: Message):
     else:
         await bot.send_message(message.chat.id, "Вы долны зарегистрироваться для просмотра своих тасков через /reg")
 
+"""this script send album"""
+@dp.message(Command(commands=['Photo']))
+async def process_Photo_command(message:Message):
+    await message.answer('https://vk.com/albums-174856092')
+
 
 dp.message.register(process_Tasks_command, Command(commands='Tasks'))
 dp.message.register(process_addTasks_command, Command(commands='addTasks'))
