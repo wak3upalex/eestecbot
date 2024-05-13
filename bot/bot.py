@@ -2,6 +2,9 @@ from aiogram import Bot, Dispatcher
 from dotenv import load_dotenv
 import os
 
+import logging
+
+logging.basicConfig(level=logging.INFO)
 # Load environment variables from .env file
 load_dotenv()
 BOT_TOKEN = os.getenv('BOT_TOKEN')
