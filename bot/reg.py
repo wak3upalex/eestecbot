@@ -16,13 +16,20 @@ import logging
 import re
 from datetime import datetime
 
+import os
 from bot import bot, dp
 
+
+def ensure_file_exists(filename):
+    if not os.path.exists(filename):
+        with open(filename, 'w') as f:
+            pass  # The file is now created.
 class RegistrationStates(StatesGroup):
     waiting_for_namesirname = State()
     waiting_for_pos = State()
 @dp.message(Command(commands=['reg']))
 async def process_reg_command(message: Message, state: FSMContext):
+    ensure_file_exists('users.txt')
     id = message.chat.id
     file = open("users.txt", "r")
     notreg = 1
