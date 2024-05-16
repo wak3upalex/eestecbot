@@ -15,6 +15,7 @@ bot = Bot(BOT_TOKEN)
 dp = Dispatcher()
 
 from reg import *
+from KPI import *
 @dp.message(Command(commands=["start"]))
 async def start_command_handler(message: types.Message):
     logging.info('Start command received')

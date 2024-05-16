@@ -15,11 +15,8 @@ import creds
 import logging
 import re
 from datetime import datetime
+from bot import bot, dp
 
-BOT_TOKEN = ''
-# Создаем объекты бота и диспетчера
-bot = Bot(token=BOT_TOKEN)
-dp = Dispatcher()
 def get_service_sacc():
     creds_json = "kpiinfo-f2eb171a014e.json"
     scopes = ['https://www.googleapis.com/auth/spreadsheets']
@@ -52,13 +49,3 @@ async def process_KPI_command(message: Message):
         await bot.send_message(message.chat.id, "Для начала пройдите регистрацию")
 dp.message.register(process_KPI_command, Command(commands='KPI'))
 
-if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    try:
-        loop.create_task(dp.start_polling(bot))
-        loop.run_forever()
-    except KeyboardInterrupt:
-        pass
-    finally:
-        loop.stop()
-        loop.close()
