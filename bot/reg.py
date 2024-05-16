@@ -16,10 +16,7 @@ import logging
 import re
 from datetime import datetime
 
-BOT_TOKEN = ''
-# Создаем объекты бота и диспетчера
-bot = Bot(token=BOT_TOKEN)
-dp = Dispatcher()
+from bot import bot, dp
 
 class RegistrationStates(StatesGroup):
     waiting_for_namesirname = State()
@@ -116,13 +113,3 @@ async def pos_get(message: Message, state:FSMContext):
 
 
 dp.message.register(process_reg_command, Command(commands='reg'))
-if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    try:
-        loop.create_task(dp.start_polling(bot))
-        loop.run_forever()
-    except KeyboardInterrupt:
-        pass
-    finally:
-        loop.stop()
-        loop.close()
