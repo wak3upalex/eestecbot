@@ -41,6 +41,7 @@ async def process_KPI_command(message: Message):
         KPI = results['values']
         bol = bol.replace(id + ' ','')
         bol = bol.replace('\n', '')
+        # TODO: add text description of the numbers of KPI. Try to refactor it into solo message not a group of messages to avoid message spam
         for i in range(len(KPI)):
             if (len(KPI[i]) !=0):
                 if bol[0:bol.rfind(" ")-1] in KPI[i][0]:
