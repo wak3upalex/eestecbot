@@ -65,7 +65,7 @@ async def process_CR_answer(message: Message):
 
 # Ответ на HR
 @dp.message(F.text == 'HR')
-async def process_PR_answer(message: Message):
+async def process_HR_answer(message: Message):
     await message.answer(
         text="HR = круто",
         reply_markup=ReplyKeyboardRemove()
