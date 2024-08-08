@@ -40,7 +40,7 @@ async def process_Board_answer(message: Message):
 @dp.message(F.text == 'IT')
 async def process_IT_answer(message: Message):
     await message.answer(
-        text="It = круто",
+        text="IT = круто",
         reply_markup=ReplyKeyboardRemove()
     )
 
