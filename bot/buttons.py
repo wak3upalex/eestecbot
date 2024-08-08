@@ -1,4 +1,4 @@
-from aiogram import Bot, types, F
+from aiogram import Bot, F
 from aiogram.types import KeyboardButton, Message, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from aiogram.filters import Command, CommandStart
 from aiogram.types import BotCommand
