@@ -15,11 +15,8 @@ import creds
 import logging
 import re
 from datetime import datetime
+from bot import bot, dp
 
-BOT_TOKEN = '6430127705:AAEPvaAi2Z2Z7Epwop7DiGVvEpmuOQ8oGu8'
-# Создаем объекты бота и диспетчера
-bot = Bot(token=BOT_TOKEN)
-dp = Dispatcher()
 r = 0
 itpoint=0
 hrpoint=0

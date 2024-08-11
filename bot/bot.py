@@ -14,6 +14,8 @@ BOT_TOKEN = os.getenv('BOT_TOKEN')
 bot = Bot(BOT_TOKEN)
 dp = Dispatcher()
 
+from quest import *
+
 @dp.message(Command(commands=["start"]))
 async def start_command_handler(message: types.Message):
     logging.info('Start command received')
