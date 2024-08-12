@@ -81,16 +81,18 @@ async def process_q4(message: types.Message, state: FSMContext):
     await state.clear()
     await calculate_result(message)
 
+
 async def calculate_result(message: types.Message):
     answers = user_answers[message.from_user.id]
-    # Подсчет количества ответов для каждой группы
     score = [0, 0, 0, 0]
+
     for i, answer in enumerate(answers):
         selected_index = questions[i]["options"].index(answer)
         score[selected_index] += 1
 
-    # Определение группы с наибольшим количеством выборов
-    result_index = score.index(max(score))
-    result_group = results_map[result_index]
+    max_score = max(score)
+    result_groups = [results_map[i] for i, s in enumerate(score) if s == max_score]
 
-    await message.answer(f"Ваш результат: {result_group}")
+    result_text = "Ваш результат: " + " и ".join(result_groups)
+    await message.answer(result_text)
+
