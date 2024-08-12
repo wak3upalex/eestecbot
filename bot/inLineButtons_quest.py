@@ -55,7 +55,7 @@ async def ask_question(message: types.Message, state: FSMContext, state_name: St
     markup = ReplyKeyboardBuilder()
 
     for option in question["options"]:
-        markup.add(KeyboardButton(text=option))
+        markup.row(KeyboardButton(text=option))
 
     await message.answer(question["question"], reply_markup=markup.as_markup(resize_keyboard=True, one_time_keyboard=True))
     await state.set_state(state_name)
