@@ -14,6 +14,8 @@ BOT_TOKEN = os.getenv('BOT_TOKEN')
 bot = Bot(BOT_TOKEN)
 dp = Dispatcher()
 
+from reg import *
+from buttons import *
 from quest import *
 
 @dp.message(Command(commands=["start"]))
