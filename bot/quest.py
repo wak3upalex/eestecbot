@@ -77,7 +77,7 @@ async def fq_get(message: Message, state:FSMContext):
         await state.set_state(QuestStates.waiting_for_sq)
     else:
         await message.answer("Вы не правильно ввели ответ на вопрос")
-        await state.clear()
+        await state.set_state(QuestStates.waiting_for_fq)
         r=1
     if r!=1:
         await message.answer("2. Вопрос...\n"
@@ -85,6 +85,8 @@ async def fq_get(message: Message, state:FSMContext):
                          "2. Ответ\n"
                          "3. Ответ\n"
                          "4. Ответ\n")
+    else:
+        r=0
 @dp.message(QuestStates.waiting_for_sq)
 async def sq_get(message: Message, state:FSMContext):
     answer = message.text
@@ -111,7 +113,7 @@ async def sq_get(message: Message, state:FSMContext):
         await state.set_state(QuestStates.waiting_for_tq)
     else:
         await message.answer("Вы не правильно ввели ответ на вопрос")
-        await state.clear()
+        await state.set_state(QuestStates.waiting_for_sq)
         r = 1
     if r!=1:
         await message.answer("3. Вопрос...\n"
@@ -119,9 +121,12 @@ async def sq_get(message: Message, state:FSMContext):
                          "2. Ответ\n"
                          "3. Ответ\n"
                          "4. Ответ\n")
+    else:
+        r=0
 @dp.message(QuestStates.waiting_for_tq)
 async def fq_get(message: Message, state:FSMContext):
     answer = message.text
+
     global itpoint
     global prpoint
     global crpoint
@@ -145,14 +150,16 @@ async def fq_get(message: Message, state:FSMContext):
         await state.set_state(QuestStates.waiting_for_foq)
     else:
         await message.answer("Вы не правильно ввели ответ на вопрос")
-        await state.clear()
+        await state.set_state(QuestStates.waiting_for_tq)
         r = 1
-    if r!=1:
+    if r != 1:
         await message.answer("4. Вопрос...\n"
-                         "1. Ответ\n"
-                         "2. Ответ\n"
-                         "3. Ответ\n"
-                         "4. Ответ\n")
+                             "1. Ответ\n"
+                             "2. Ответ\n"
+                             "3. Ответ\n"
+                             "4. Ответ\n")
+    else:
+        r = 0
 @dp.message(QuestStates.waiting_for_foq)
 async def foq_get(message: Message, state:FSMContext):
     answer = message.text
@@ -179,14 +186,16 @@ async def foq_get(message: Message, state:FSMContext):
         await state.set_state(QuestStates.waiting_for_fisq)
     else:
         await message.answer("Вы не правильно ввели ответ на вопрос")
-        await state.clear()
+        await state.set_state(QuestStates.waiting_for_foq)
         r = 1
-    if r!=1:
+    if r != 1:
         await message.answer("5. Вопрос...\n"
-                         "1. Ответ\n"
-                         "2. Ответ\n"
-                         "3. Ответ\n"
-                         "4. Ответ\n")
+                             "1. Ответ\n"
+                             "2. Ответ\n"
+                             "3. Ответ\n"
+                             "4. Ответ\n")
+    else:
+        r = 0
 @dp.message(QuestStates.waiting_for_fisq)
 async def fisq_get(message: Message, state:FSMContext):
     answer = message.text
@@ -213,14 +222,16 @@ async def fisq_get(message: Message, state:FSMContext):
         await state.set_state(QuestStates.waiting_for_sixq)
     else:
         await message.answer("Вы не правильно ввели ответ на вопрос")
-        await state.clear()
+        await state.set_state(QuestStates.waiting_for_fisq)
         r = 1
-    if r!=1:
+    if r != 1:
         await message.answer("6. Вопрос...\n"
-                         "1. Ответ\n"
-                         "2. Ответ\n"
-                         "3. Ответ\n"
-                         "4. Ответ\n")
+                             "1. Ответ\n"
+                             "2. Ответ\n"
+                             "3. Ответ\n"
+                             "4. Ответ\n")
+    else:
+        r = 0
 @dp.message(QuestStates.waiting_for_sixq)
 async def ssq_get(message: Message, state:FSMContext):
     answer = message.text
@@ -247,14 +258,16 @@ async def ssq_get(message: Message, state:FSMContext):
         await state.set_state(QuestStates.waiting_for_sevq)
     else:
         await message.answer("Вы не правильно ввели ответ на вопрос")
-        await state.clear()
+        await state.set_state(QuestStates.waiting_for_sixq)
         r = 1
-    if r!=1:
+    if r != 1:
         await message.answer("7. Вопрос...\n"
-                         "1. Ответ\n"
-                         "2. Ответ\n"
-                         "3. Ответ\n"
-                         "4. Ответ\n")
+                             "1. Ответ\n"
+                             "2. Ответ\n"
+                             "3. Ответ\n"
+                             "4. Ответ\n")
+    else:
+        r = 0
 @dp.message(QuestStates.waiting_for_sevq)
 async def fq_get(message: Message, state:FSMContext):
     answer = message.text
@@ -281,14 +294,16 @@ async def fq_get(message: Message, state:FSMContext):
         await state.set_state(QuestStates.waiting_for_esq)
     else:
         await message.answer("Вы не правильно ввели ответ на вопрос")
-        await state.clear()
+        await state.set_state(QuestStates.waiting_for_sevq)
         r = 1
-    if r!=1:
+    if r != 1:
         await message.answer("8. Вопрос...\n"
-                         "1. Ответ\n"
-                         "2. Ответ\n"
-                         "3. Ответ\n"
-                         "4. Ответ\n")
+                             "1. Ответ\n"
+                             "2. Ответ\n"
+                             "3. Ответ\n"
+                             "4. Ответ\n")
+    else:
+        r = 0
 @dp.message(QuestStates.waiting_for_esq)
 async def fq_get(message: Message, state:FSMContext):
     answer = message.text
@@ -315,14 +330,16 @@ async def fq_get(message: Message, state:FSMContext):
         await state.set_state(QuestStates.waiting_for_nsq)
     else:
         await message.answer("Вы не правильно ввели ответ на вопрос")
-        await state.clear()
+        await state.set_state(QuestStates.waiting_for_esq)
         r = 1
-    if r!=1:
+    if r != 1:
         await message.answer("9. Вопрос...\n"
-                         "1. Ответ\n"
-                         "2. Ответ\n"
-                         "3. Ответ\n"
-                         "4. Ответ\n")
+                             "1. Ответ\n"
+                             "2. Ответ\n"
+                             "3. Ответ\n"
+                             "4. Ответ\n")
+    else:
+        r = 0
 @dp.message(QuestStates.waiting_for_nsq)
 async def fq_get(message: Message, state:FSMContext):
     answer = message.text
@@ -349,18 +366,20 @@ async def fq_get(message: Message, state:FSMContext):
         await state.set_state(QuestStates.waiting_for_tsq)
     else:
         await message.answer("Вы не правильно ввели ответ на вопрос")
-        await state.clear()
-        r=1
-
-    if (r != 1):
+        await state.set_state(QuestStates.waiting_for_nsq)
+        r = 1
+    if r != 1:
         await message.answer("10. Вопрос...\n"
-                         "1. Ответ\n"
-                         "2. Ответ\n"
-                         "3. Ответ\n"
-                         "4. Ответ\n")
+                             "1. Ответ\n"
+                             "2. Ответ\n"
+                             "3. Ответ\n"
+                             "4. Ответ\n")
+    else:
+        r = 0
 @dp.message(QuestStates.waiting_for_tsq)
 async def fq_get(message: Message, state:FSMContext):
     answer = message.text
+    file = open("newbies.txt", "a")
     global itpoint
     global prpoint
     global crpoint
@@ -384,17 +403,21 @@ async def fq_get(message: Message, state:FSMContext):
         await state.set_state(QuestStates.waiting_for_sq)
     else:
         await message.answer("Вы не правильно ввели ответ на вопрос")
-        await state.clear()
+        await state.set_state(QuestStates.waiting_for_tsq)
         r=1
     await state.clear()
     if (itpoint>=hrpoint and itpoint>=crpoint and itpoint>=prpoint and r!=1):
         await message.answer("Идите в it")
+        file.write(str(message.from_user.id) + " IT\n")
     elif (hrpoint>=itpoint and hrpoint>=crpoint and hrpoint>=prpoint and r!=1):
         await message.answer("Идите в hr")
+        file.write(str(message.from_user.id) + " HR\n")
     elif (crpoint>=itpoint and crpoint>=hrpoint and crpoint>=prpoint and r!=1):
-        await message.answer("Идите в hr")
+        await message.answer("Идите в cr")
+        file.write(str(message.from_user.id) + " CR\n")
     elif (prpoint>=itpoint and prpoint>=crpoint and prpoint>=hrpoint and r!=1):
-        await message.answer("Идите в hr")
+        await message.answer("Идите в pr")
+        file.write(str(message.from_user.id) + " PR\n")
 dp.message.register(process_quest_command, Command(commands='quest'))
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
