@@ -1,4 +1,4 @@
-from aiogram import Bot,  F
+from aiogram import Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import KeyboardButton, Message, ReplyKeyboardMarkup, ReplyKeyboardRemove
@@ -12,7 +12,9 @@ class AboutUsStates(StatesGroup) :
 
 departments = ["Board", "IT", "PR", "CR", "HR"]
 buttons = [KeyboardButton(text=text) for text in departments]
-keyboard = ReplyKeyboardMarkup(keyboard=[buttons], resize_keyboard=True)
+keyboard = ReplyKeyboardMarkup(keyboard=[[button] for button in buttons],resize_keyboard=True)
+
+
 
 # Обработчик команды /help
 @dp.message(Command(commands='help'))
@@ -35,9 +37,9 @@ async def about_us(message:Message, state: FSMContext):
 # Обработчик для всех департаментов
 @dp.message(StateFilter(AboutUsStates.WaitingForDepartmentChoice))
 async def process_department_choice(message: Message, state: FSMContext):
-    department = message.text  # Получаем текст сообщения пользователя
+    department = message.text
 
-    # Проверяем текст и отвечаем соответственно
+
     if department == 'Board':
         await message.answer(
             text="Board = Крутой отдел",
@@ -68,9 +70,9 @@ async def process_department_choice(message: Message, state: FSMContext):
             text="Пожалуйста, выберите один из предложенных отделов используя кнопочки.",
             reply_markup=keyboard
         )
-        return  # Возвращаемся, чтобы не сбрасывать состояние
+        return
 
-    # Сбрасываем состояние после успешного ответа
+
     await state.clear()
 
 #menu
