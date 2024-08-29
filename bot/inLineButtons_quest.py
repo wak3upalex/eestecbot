@@ -15,6 +15,7 @@ class TestStates(StatesGroup):
     Q3 = State()
     Q4 = State()
 
+
 # Вопросы и ответы
 questions = [
     {
