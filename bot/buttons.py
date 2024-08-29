@@ -1,13 +1,20 @@
-from aiogram import Bot,  F
+from aiogram import Bot
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import KeyboardButton, Message, ReplyKeyboardMarkup, ReplyKeyboardRemove
-from aiogram.filters import Command
+from aiogram.filters import Command, StateFilter
 from aiogram.types import BotCommand
 from bot import bot, dp
+
+class AboutUsStates(StatesGroup) :
+    WaitingForDepartmentChoice = State()
 
 
 departments = ["Board", "IT", "PR", "CR", "HR"]
 buttons = [KeyboardButton(text=text) for text in departments]
-keyboard = ReplyKeyboardMarkup(keyboard=[buttons], resize_keyboard=True)
+keyboard = ReplyKeyboardMarkup(keyboard=[[button] for button in buttons],resize_keyboard=True)
+
+
 
 # Обработчик команды /help
 @dp.message(Command(commands='help'))
@@ -20,56 +27,54 @@ async def help_command(message:Message):
 
 # Обработчик команды /about_us
 @dp.message(Command(commands='about_us'))
-async def about_us(message:Message):
+async def about_us(message:Message, state: FSMContext):
     await message.answer(
         text='Про какой отдел хочешь узнать?',
         reply_markup=keyboard
     )
+    await state.set_state(AboutUsStates.WaitingForDepartmentChoice)
+
+# Обработчик для всех департаментов
+@dp.message(StateFilter(AboutUsStates.WaitingForDepartmentChoice))
+async def process_department_choice(message: Message, state: FSMContext):
+    department = message.text
 
 
-# Ответ на Board
-@dp.message(F.text == 'Board')
-async def process_Board_answer(message: Message):
-    await message.answer(
-        text="Board = круто",
-        reply_markup=ReplyKeyboardRemove()
-    )
+    if department == 'Board':
+        await message.answer(
+            text="Board = Крутой отдел",
+            reply_markup=ReplyKeyboardRemove()
+        )
+    elif department == 'IT':
+        await message.answer(
+            text="IT = Крутой отдел.",
+            reply_markup=ReplyKeyboardRemove()
+        )
+    elif department == 'PR':
+        await message.answer(
+            text="PR = Крутой отдел.",
+            reply_markup=ReplyKeyboardRemove()
+        )
+    elif department == 'CR':
+        await message.answer(
+            text="CR = Крутой отдел.",
+            reply_markup=ReplyKeyboardRemove()
+        )
+    elif department == 'HR':
+        await message.answer(
+            text="HR = Крутой отдел.",
+            reply_markup=ReplyKeyboardRemove()
+        )
+    else:
+        await message.answer(
+            text="Пожалуйста, выберите один из предложенных отделов используя кнопочки.",
+            reply_markup=keyboard
+        )
+        return
 
 
-# Ответ на IT
-@dp.message(F.text == 'IT')
-async def process_IT_answer(message: Message):
-    await message.answer(
-        text="IT = круто",
-        reply_markup=ReplyKeyboardRemove()
-    )
+    await state.clear()
 
-
-# Ответ на PR
-@dp.message(F.text == 'PR')
-async def process_PR_answer(message: Message):
-    await message.answer(
-        text="PR = круто",
-        reply_markup=ReplyKeyboardRemove()
-    )
-
-
-# Ответ на CR
-@dp.message(F.text == 'CR')
-async def process_CR_answer(message: Message):
-    await message.answer(
-        text="CR = круто",
-        reply_markup=ReplyKeyboardRemove()
-    )
-
-
-# Ответ на HR
-@dp.message(F.text == 'HR')
-async def process_HR_answer(message: Message):
-    await message.answer(
-        text="HR = круто",
-        reply_markup=ReplyKeyboardRemove()
-    )
 #menu
 async def set_main_menu(bot:Bot):
     main_menu_commands = [

@@ -15,7 +15,7 @@ bot = Bot(BOT_TOKEN)
 dp = Dispatcher()
 
 from reg import *
-
+from inLineButtons_quest import *
 from buttons import *
 @dp.message(Command(commands=["start"]))
 async def start_command_handler(message: types.Message):
