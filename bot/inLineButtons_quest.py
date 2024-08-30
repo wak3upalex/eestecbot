@@ -114,31 +114,31 @@ async def process_q3(message: types.Message, state: FSMContext):
     await handle_answer(message, state, TestStates.Q4, 2)
 
 @dp.message(StateFilter(TestStates.Q4))
-async def process_q3(message: types.Message, state: FSMContext):
+async def process_q4(message: types.Message, state: FSMContext):
     await handle_answer(message, state, TestStates.Q5, 3)
 
 @dp.message(StateFilter(TestStates.Q5))
-async def process_q3(message: types.Message, state: FSMContext):
+async def process_q5(message: types.Message, state: FSMContext):
     await handle_answer(message, state, TestStates.Q6, 4)
 
 @dp.message(StateFilter(TestStates.Q6))
-async def process_q3(message: types.Message, state: FSMContext):
+async def process_q6(message: types.Message, state: FSMContext):
     await handle_answer(message, state, TestStates.Q7, 5)
 
 @dp.message(StateFilter(TestStates.Q7))
-async def process_q3(message: types.Message, state: FSMContext):
+async def process_q7(message: types.Message, state: FSMContext):
     await handle_answer(message, state, TestStates.Q8, 6)
 
 @dp.message(StateFilter(TestStates.Q8))
-async def process_q3(message: types.Message, state: FSMContext):
+async def process_q8(message: types.Message, state: FSMContext):
     await handle_answer(message, state, TestStates.Q9, 7)
 
 @dp.message(StateFilter(TestStates.Q9))
-async def process_q3(message: types.Message, state: FSMContext):
+async def process_q9(message: types.Message, state: FSMContext):
     await handle_answer(message, state, TestStates.Q10, 8)
 
 @dp.message(StateFilter(TestStates.Q10))
-async def process_q4(message: types.Message, state: FSMContext):
+async def process_q10(message: types.Message, state: FSMContext):
     user_answers[message.from_user.id].append(message.text)
     await state.clear()
     await calculate_result(message)
