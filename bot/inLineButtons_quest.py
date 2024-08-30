@@ -14,6 +14,12 @@ class TestStates(StatesGroup):
     Q2 = State()
     Q3 = State()
     Q4 = State()
+    Q5 = State()
+    Q6 = State()
+    Q7 = State()
+    Q8 = State()
+    Q9 = State()
+    Q10 = State()
 
 
 # Вопросы и ответы
@@ -33,7 +39,32 @@ questions = [
     {
         "question": "Какую область вы хотите развивать?",
         "options": ["IT", "PR", "CR", "HR"]
-    }
+    },
+    {
+        "question" : "Вопрос 5",
+        "options" : ["Ответ 1","Ответ 2","Ответ 3","Ответ 4"]
+    },
+    {
+        "question" : "Вопрос 6",
+        "options" : ["Ответ 1","Ответ 2","Ответ 3","Ответ 4"]
+    },
+    {
+        "question" : "Вопрос 7",
+        "options" : ["Ответ 1","Ответ 2","Ответ 3","Ответ 4"]
+    },
+    {
+        "question" : "Вопрос 8",
+        "options" : ["Ответ 1","Ответ 2","Ответ 3","Ответ 4"]
+    },
+    {
+        "question" : "Вопрос 9",
+        "options" : ["Ответ 1","Ответ 2","Ответ 3","Ответ 4"]
+    },
+    {
+        "question" : "Вопрос 10",
+        "options" : ["Ответ 1","Ответ 2","Ответ 3","Ответ 4"]
+    },
+
 ]
 
 results_map = {
@@ -47,7 +78,7 @@ user_answers = {}
 
 @dp.message(Command("quest"))
 async def start_test(message: types.Message, state: FSMContext):
-    await message.answer("Правила: Вам будет задано 4 вопроса с вариантами ответов. Выберите один из вариантов.")
+    await message.answer("Правила: Вам будет задано 5 вопроса с вариантами ответов. Выберите один из вариантов.")
     user_answers[message.from_user.id] = []
     await ask_question(message, state, TestStates.Q1, 0)
 
@@ -77,6 +108,36 @@ async def process_q3(message: types.Message, state: FSMContext):
     await ask_question(message, state, TestStates.Q4, 3)
 
 @dp.message(StateFilter(TestStates.Q4))
+async def process_q3(message: types.Message, state: FSMContext):
+    user_answers[message.from_user.id].append(message.text)
+    await ask_question(message, state, TestStates.Q5, 4)
+
+@dp.message(StateFilter(TestStates.Q5))
+async def process_q3(message: types.Message, state: FSMContext):
+    user_answers[message.from_user.id].append(message.text)
+    await ask_question(message, state, TestStates.Q6, 5)
+
+@dp.message(StateFilter(TestStates.Q6))
+async def process_q3(message: types.Message, state: FSMContext):
+    user_answers[message.from_user.id].append(message.text)
+    await ask_question(message, state, TestStates.Q7, 6)
+
+@dp.message(StateFilter(TestStates.Q7))
+async def process_q3(message: types.Message, state: FSMContext):
+    user_answers[message.from_user.id].append(message.text)
+    await ask_question(message, state, TestStates.Q8, 7)
+
+@dp.message(StateFilter(TestStates.Q8))
+async def process_q3(message: types.Message, state: FSMContext):
+    user_answers[message.from_user.id].append(message.text)
+    await ask_question(message, state, TestStates.Q9, 8)
+
+@dp.message(StateFilter(TestStates.Q9))
+async def process_q3(message: types.Message, state: FSMContext):
+    user_answers[message.from_user.id].append(message.text)
+    await ask_question(message, state, TestStates.Q10, 9)
+
+@dp.message(StateFilter(TestStates.Q10))
 async def process_q4(message: types.Message, state: FSMContext):
     user_answers[message.from_user.id].append(message.text)
     await state.clear()
