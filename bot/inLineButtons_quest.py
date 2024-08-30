@@ -2,7 +2,7 @@ from aiogram import types
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import KeyboardButton
+from aiogram.types import KeyboardButton, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bot import bot, dp
@@ -78,7 +78,7 @@ user_answers = {}
 
 @dp.message(Command("quest"))
 async def start_test(message: types.Message, state: FSMContext):
-    await message.answer("Правила: Вам будет задано 5 вопроса с вариантами ответов. Выберите один из вариантов.")
+    await message.answer("Правила: Вам будет задано 10 вопросов с вариантами ответов. Выберите один из вариантов.")
     user_answers[message.from_user.id] = []
     await ask_question(message, state, TestStates.Q1, 0)
 
@@ -89,59 +89,60 @@ async def ask_question(message: types.Message, state: FSMContext, state_name: St
     for option in question["options"]:
         markup.row(KeyboardButton(text=option))
 
-    await message.answer(question["question"], reply_markup=markup.as_markup(resize_keyboard=True, one_time_keyboard=True))
+    await message.answer(question["question"], reply_markup=markup.as_markup(resize_keyboard=True, one_time_keyboard=False))
     await state.set_state(state_name)
 
+async def handle_answer(message: types.Message, state: FSMContext, next_state: State, question_index: int):
+    user_input = message.text
+    correct_options = questions[question_index]["options"]
+    if user_input not in correct_options:
+        print(f"Некорректный ответ от пользователя {message.from_user.id}: {user_input}.")
+        await message.answer("Пожалуйста, выберите один из предложенных вариантов ответа.")
+        return
+    user_answers[message.from_user.id].append(user_input)
+    await ask_question(message, state, next_state, question_index + 1)
 @dp.message(StateFilter(TestStates.Q1))
 async def process_q1(message: types.Message, state: FSMContext):
-    user_answers[message.from_user.id].append(message.text)
-    await ask_question(message, state, TestStates.Q2, 1)
+    await handle_answer(message, state, TestStates.Q2, 0)
 
 @dp.message(StateFilter(TestStates.Q2))
 async def process_q2(message: types.Message, state: FSMContext):
-    user_answers[message.from_user.id].append(message.text)
-    await ask_question(message, state, TestStates.Q3, 2)
+    await handle_answer(message, state, TestStates.Q3, 1)
 
 @dp.message(StateFilter(TestStates.Q3))
 async def process_q3(message: types.Message, state: FSMContext):
-    user_answers[message.from_user.id].append(message.text)
-    await ask_question(message, state, TestStates.Q4, 3)
+    await handle_answer(message, state, TestStates.Q4, 2)
 
 @dp.message(StateFilter(TestStates.Q4))
 async def process_q3(message: types.Message, state: FSMContext):
-    user_answers[message.from_user.id].append(message.text)
-    await ask_question(message, state, TestStates.Q5, 4)
+    await handle_answer(message, state, TestStates.Q5, 3)
 
 @dp.message(StateFilter(TestStates.Q5))
 async def process_q3(message: types.Message, state: FSMContext):
-    user_answers[message.from_user.id].append(message.text)
-    await ask_question(message, state, TestStates.Q6, 5)
+    await handle_answer(message, state, TestStates.Q6, 4)
 
 @dp.message(StateFilter(TestStates.Q6))
 async def process_q3(message: types.Message, state: FSMContext):
-    user_answers[message.from_user.id].append(message.text)
-    await ask_question(message, state, TestStates.Q7, 6)
+    await handle_answer(message, state, TestStates.Q7, 5)
 
 @dp.message(StateFilter(TestStates.Q7))
 async def process_q3(message: types.Message, state: FSMContext):
-    user_answers[message.from_user.id].append(message.text)
-    await ask_question(message, state, TestStates.Q8, 7)
+    await handle_answer(message, state, TestStates.Q8, 6)
 
 @dp.message(StateFilter(TestStates.Q8))
 async def process_q3(message: types.Message, state: FSMContext):
-    user_answers[message.from_user.id].append(message.text)
-    await ask_question(message, state, TestStates.Q9, 8)
+    await handle_answer(message, state, TestStates.Q9, 7)
 
 @dp.message(StateFilter(TestStates.Q9))
 async def process_q3(message: types.Message, state: FSMContext):
-    user_answers[message.from_user.id].append(message.text)
-    await ask_question(message, state, TestStates.Q10, 9)
+    await handle_answer(message, state, TestStates.Q10, 8)
 
 @dp.message(StateFilter(TestStates.Q10))
 async def process_q4(message: types.Message, state: FSMContext):
     user_answers[message.from_user.id].append(message.text)
     await state.clear()
     await calculate_result(message)
+
 
 
 async def calculate_result(message: types.Message):
@@ -156,5 +157,5 @@ async def calculate_result(message: types.Message):
     result_groups = [results_map[i] for i, s in enumerate(score) if s == max_score]
 
     result_text = "Ваш результат: " + " и ".join(result_groups)
-    await message.answer(result_text)
+    await message.answer(result_text, reply_markup=ReplyKeyboardRemove())
 
