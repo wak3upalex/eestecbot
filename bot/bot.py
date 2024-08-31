@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from aiogram import types
 from aiogram.filters import Command
 import os
+import json
 
 import logging
 
@@ -19,6 +20,8 @@ from inLineButtons_quest import *
 from buttons import *
 @dp.message(Command(commands=["start"]))
 async def start_command_handler(message: types.Message):
+    with open(message.from_user.username + '.txt', 'w') as outfile:
+        json.dump(message.model_dump_json(), outfile)
     logging.info('Start command received')
     await message.answer('Привет! Я бот-помощник сообщества EESTEC LC St. Petersburg!')
 
