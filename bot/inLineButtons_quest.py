@@ -175,6 +175,17 @@ async def process_q9(message: types.Message, state: FSMContext):
 
 @dp.message(StateFilter(TestStates.Q10))
 async def process_q10(message: types.Message, state: FSMContext):
+
+    user_input = message.text
+    correct_options = questions[9]["options"]
+
+    if user_input not in correct_options:
+
+        print(f"Некорректный ответ от пользователя {message.from_user.id}: {user_input}.")
+
+        await message.answer("Пожалуйста, выберите один из предложенных вариантов ответа.")
+        return
+
     user_answers[message.from_user.id].append(message.text)
     await state.clear()
     await calculate_result(message)
