@@ -7,8 +7,24 @@ import json
 from datetime import datetime
 
 import logging
+log_file_path = 'logs_bot.log'  # Указываем имя файла для логов
 
-logging.basicConfig(level=logging.INFO)
+# Создание обработчика для записи логов в файл на уровне WARNING и выше
+file_handler = logging.FileHandler(log_file_path)
+file_handler.setLevel(logging.WARNING)
+
+# Создание обработчика для вывода логов в консоль на уровне INFO и выше
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+
+# Форматирование логов
+formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(name)s : %(message)s')
+file_handler.setFormatter(formatter)
+console_handler.setFormatter(formatter)
+
+# Добавляем обработчики к логгеру
+logging.basicConfig(level=logging.WARNING, handlers=[file_handler, console_handler])
+
 # Load environment variables from .env file
 load_dotenv()
 BOT_TOKEN = os.getenv('BOT_TOKEN')
@@ -41,7 +57,6 @@ async def start_command_handler(message: types.Message):
             "first_name": message.from_user.first_name,
             "last_name": message.from_user.last_name,
             "language_code": message.from_user.language_code,
-            "message_id": message.message_id,
             "last_interaction_time": current_time,
             "quest_result": None  # Initialize quest_result field
         }
