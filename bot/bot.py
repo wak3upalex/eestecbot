@@ -4,6 +4,7 @@ from aiogram import types
 from aiogram.filters import Command
 import os
 import json
+from datetime import datetime
 
 import logging
 
@@ -20,8 +21,24 @@ from inLineButtons_quest import *
 from buttons import *
 @dp.message(Command(commands=["start"]))
 async def start_command_handler(message: types.Message):
-    with open(message.from_user.username + '.txt', 'w') as outfile:
-        json.dump(message.model_dump_json(), outfile)
+    # Ensure the 'users' directory exists
+    if not os.path.exists('users'):
+        os.makedirs('users')
+
+    current_time = datetime.now().isoformat()
+    # Save user data in JSON format in the 'users' directory
+    user_data = {
+        "id": message.from_user.id,
+        "username": message.from_user.username,
+        "first_name": message.from_user.first_name,
+        "last_name": message.from_user.last_name,
+        "language_code": message.from_user.language_code,
+        "message_id": message.message_id,
+        "last_interaction_time": current_time
+    }
+    with open(f'users/{message.from_user.username}.json', 'w') as outfile:
+        json.dump(user_data, outfile)
+
     logging.info('Start command received')
     await message.answer('Привет! Я бот-помощник сообщества EESTEC LC St. Petersburg!')
 
