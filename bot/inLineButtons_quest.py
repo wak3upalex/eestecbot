@@ -1,3 +1,7 @@
+import json
+import logging
+import os
+
 from aiogram import types
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
@@ -196,6 +200,7 @@ async def calculate_result(message: types.Message):
     answers = user_answers[message.from_user.id]
     score = [0, 0, 0, 0]
 
+    # Рассчитываем количество очков для каждого типа ответа
     for i, answer in enumerate(answers):
         selected_index = questions[i]["options"].index(answer)
         score[selected_index] += 1
@@ -206,9 +211,28 @@ async def calculate_result(message: types.Message):
     result_text = "Ваш результат: " + " и ".join(result_groups)
     await message.answer(result_text, reply_markup=ReplyKeyboardRemove())
 
+    # Отправляем пользователю описание подходящих команд
     for result_group in result_groups:
         description = team_descriptions.get(result_group)
         if description:
             await message.answer(description)
 
+    # Определяем путь к файлу пользователя
+    user_file_path = f'users/{message.from_user.username}.json'
 
+    # Проверяем, существует ли файл пользователя
+    if os.path.exists(user_file_path):
+        # Загружаем существующие данные пользователя из JSON-файла
+        with open(user_file_path, 'r') as infile:
+            user_data = json.load(infile)
+
+        # Обновляем поле с результатами прохождения теста
+        user_data["quest_result"] = result_groups
+
+        # Сохраняем обновленные данные пользователя обратно в JSON-файл
+        with open(user_file_path, 'w') as outfile:
+            json.dump(user_data, outfile)
+
+        logging.info('User result updated in file: %s', user_file_path)
+    else:
+        logging.error('User file not found for user: %s', message.from_user.id)
