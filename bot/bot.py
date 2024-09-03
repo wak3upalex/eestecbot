@@ -23,7 +23,7 @@ file_handler.setFormatter(formatter)
 console_handler.setFormatter(formatter)
 
 # Добавляем обработчики к логгеру
-logging.basicConfig(level=logging.WARNING, handlers=[file_handler, console_handler])
+logging.basicConfig(level=logging.DEBUG, handlers=[file_handler, console_handler])
 
 # Load environment variables from .env file
 load_dotenv()
@@ -69,7 +69,7 @@ async def start_command_handler(message: types.Message):
         json.dump(user_data, outfile)
 
     logging.info('Start command received from user: %s', message.from_user.username)
-    await message.answer('Привет! Я бот-помощник сообщества EESTEC LC St. Petersburg!')
+    await message.answer('Привет! Я бот-помощник сообщества EESTEC LC St. Petersburg! \nНажимай команду /quest и узнавай, какой отдел тебе подходит!🥰')
 
 if __name__ == '__main__':
     dp.run_polling(bot)
