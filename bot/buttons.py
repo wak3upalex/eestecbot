@@ -8,7 +8,7 @@ from aiogram.types import BotCommand
 from bot import bot, dp
 
 
-# back and exit commands
+
 class AboutUsStates(StatesGroup) :
     WaitingForDepartmentChoice = State()
 
@@ -94,6 +94,11 @@ async def set_main_menu(bot:Bot):
         BotCommand(command='/help',description= 'Справка по работе бота'),
         BotCommand(command='/about_us',description='Команда, которая расскажет тебе про наши отделы'),
         BotCommand(command='/quest',description= 'Пройди квест для определения своего отдела'),
+
+        #удалить при надобности
+        BotCommand(command='/back', description='Возвращает в начало квеста'),
+        BotCommand(command='/exit', description='Выходит из состояния квеста '),
+
     ]
     await bot.set_my_commands(main_menu_commands)
 dp.startup.register(set_main_menu)
