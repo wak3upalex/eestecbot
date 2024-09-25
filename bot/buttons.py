@@ -80,8 +80,14 @@ async def process_department_choice(message: Message, state: FSMContext):
     else:
         await message.answer(
             text="Пожалуйста, выберите один из предложенных отделов используя кнопочки.",
-            reply_markup=keyboard
-        )
+            reply_markup=keyboard,
+        ),
+
+        if department == "/start":
+            print(f"Пользователь вышел из about_us {message.from_user.id}: {department}.")
+            await message.answer("Вы вышли из /about_us", reply_markup=ReplyKeyboardRemove())
+            await state.clear()
+
         return
 
 
