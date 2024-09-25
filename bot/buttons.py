@@ -7,6 +7,8 @@ from aiogram.filters import Command, StateFilter
 from aiogram.types import BotCommand
 from bot import bot, dp
 
+
+# back and exit commands
 class AboutUsStates(StatesGroup) :
     WaitingForDepartmentChoice = State()
 
