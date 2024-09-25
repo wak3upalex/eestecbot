@@ -6,7 +6,8 @@ from aiogram import types
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import KeyboardButton, ReplyKeyboardRemove
+from aiogram.types import KeyboardButton, ReplyKeyboardRemove, Message
+from aiogram.utils import keyboard
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bot import bot, dp
 
@@ -141,6 +142,31 @@ async def handle_answer(message: types.Message, state: FSMContext, next_state: S
         return
     user_answers[message.from_user.id].append(user_input)
     await ask_question(message, state, next_state, question_index + 1)
+
+
+@dp.message(Command(commands='back'))
+async def back_command(message: Message, state: FSMContext):
+    user_id = message.from_user.id
+    user_answers[user_id] = []
+    await message.answer(
+        text='Возвращаю к началу теста...',
+        reply_markup=ReplyKeyboardRemove(),
+    )
+    # Возвращаем пользователя к первому вопросу
+    await ask_question(message, state, TestStates.Q1, 0)
+
+@dp.message(Command(commands='exit'))
+async def exit_command(message: Message, state: FSMContext):
+    user_id = message.from_user.id
+    user_answers.pop(user_id, None)
+    await state.clear()
+    await message.answer(
+        text="Вы вышли из прохождения теста.",
+        reply_markup=ReplyKeyboardRemove(),
+    )
+
+
+
 @dp.message(StateFilter(TestStates.Q1))
 async def process_q1(message: types.Message, state: FSMContext):
     await handle_answer(message, state, TestStates.Q2, 0)
