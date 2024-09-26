@@ -2,13 +2,11 @@ import json
 import logging
 import os
 
-
-from aiogram import Bot
 from aiogram import types
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import KeyboardButton, ReplyKeyboardRemove, Message, BotCommand
+from aiogram.types import KeyboardButton, ReplyKeyboardRemove, Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bot import bot, dp
 
@@ -118,24 +116,10 @@ team_descriptions ={
 
 user_answers = {}
 
-
-#menu
-async def quest_menu(bot:Bot):
-    main_menu_commands = [
-        BotCommand(command='/back', description='Возвращает в начало квеста'),
-        BotCommand(command='/exit', description='Выходит из состояния квеста '),
-    ]
-    await bot.set_my_commands(main_menu_commands)
-
-async def clear_menu(bot: Bot):
-    await bot.set_my_commands([])
-
 @dp.message(Command("quest"))
 async def start_test(message: types.Message, state: FSMContext):
-    await quest_menu(bot)
     await message.answer("Правила: Вам будет задано 10 вопросов с вариантами ответов. Выберите один из вариантов.")
     user_answers[message.from_user.id] = []
-
     await ask_question(message, state, TestStates.Q1, 0)
 
 async def ask_question(message: types.Message, state: FSMContext, state_name: State, question_index: int):
@@ -157,10 +141,7 @@ async def handle_answer(message: types.Message, state: FSMContext, next_state: S
 
     if user_input == "/start":
         print(f"Пользователь вышел из теста {message.from_user.id}: {user_input}.")
-        await message.answer(
-            "Вы вышли из прохождения теста командой старт",
-            reply_markup=ReplyKeyboardRemove(),
-        )
+        await message.answer("Вы вышли из прохождения теста командой старт")
         await state.clear()
 
         return
@@ -184,7 +165,6 @@ async def exit_command(message: Message, state: FSMContext):
     user_id = message.from_user.id
     user_answers.pop(user_id, None)
     await state.clear()
-    await clear_menu(bot)
     await message.answer(
         text="Вы вышли из прохождения теста.",
         reply_markup=ReplyKeyboardRemove(),
@@ -243,7 +223,6 @@ async def process_q10(message: types.Message, state: FSMContext):
 
     user_answers[message.from_user.id].append(message.text)
     await state.clear()
-    await clear_menu(bot)
     await calculate_result(message)
 
 
