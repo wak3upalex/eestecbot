@@ -141,7 +141,10 @@ async def handle_answer(message: types.Message, state: FSMContext, next_state: S
 
     if user_input == "/start":
         print(f"Пользователь вышел из теста {message.from_user.id}: {user_input}.")
-        await message.answer("Вы вышли из прохождения теста командой старт")
+        await message.answer(
+            text='Вы вышли из прохождения теста командой старт',
+            reply_markup=ReplyKeyboardRemove(),
+        )
         await state.clear()
 
         return
