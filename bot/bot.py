@@ -7,7 +7,7 @@ import json
 from datetime import datetime
 
 import logging
-log_file_path = 'bot/logs/logs_bot.log'  # Указываем имя файла для логов
+log_file_path = '../logs/logs_bot.log'  # Указываем имя файла для логов
 
 # Создание обработчика для записи логов в файл на уровне WARNING и выше
 file_handler = logging.FileHandler(log_file_path)
