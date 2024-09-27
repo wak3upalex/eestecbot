@@ -35,6 +35,7 @@ dp = Dispatcher()
 from reg import *
 from inLineButtons_quest import *
 from buttons import *
+from newsletter import *
 @dp.message(Command(commands=["start"]))
 async def start_command_handler(message: types.Message):
     # Ensure the 'users' directory exists
@@ -58,7 +59,9 @@ async def start_command_handler(message: types.Message):
             "last_name": message.from_user.last_name,
             "language_code": message.from_user.language_code,
             "last_interaction_time": current_time,
-            "quest_result": None  # Initialize quest_result field
+            "quest_result": None,  # Initialize quest_result field
+            "role": "outmem", # Initialize registration_result
+            "subrole": None # :)
         }
 
     # Update last interaction time
@@ -70,6 +73,5 @@ async def start_command_handler(message: types.Message):
 
     logging.info('Start command received from user: %s', message.from_user.username)
     await message.answer('Привет! Я бот-помощник сообщества EESTEC LC St. Petersburg! \nНажимай команду /quest и узнавай, какой отдел тебе подходит!🥰')
-
 if __name__ == '__main__':
     dp.run_polling(bot)

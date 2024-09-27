@@ -90,6 +90,12 @@ async def pos_get(message: Message, state:FSMContext):
         file.write('\n')
         file.close()
         await message.reply("Регистрация прошла успешно, желаю исполнить все поставленные задачи новый стул")
+    elif (pos == 'VC93827'):
+        file = open("users.txt", "a")
+        file.write('VC')
+        file.write('\n')
+        file.close()
+        await message.reply("Регистрация прошла успешно, желаю исполнить все поставленные задачи новый стул")
     elif (pos == 'IT'):
         file = open("users.txt", "a")
         file.write('IT')
