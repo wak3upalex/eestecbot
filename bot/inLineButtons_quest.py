@@ -116,6 +116,17 @@ team_descriptions ={
 
 user_answers = {}
 
+async def set_main_menu(bot:Bot):
+    main_menu_commands = [
+        BotCommand(command='/start',description='Ah Shit,here we go again.'),
+        BotCommand(command='/help',description= 'Справка по работе бота'),
+        BotCommand(command='/about_us',description='Команда, которая расскажет тебе про наши отделы'),
+        BotCommand(command='/quest',description= 'Пройди квест для определения своего отдела'),
+    ]
+    await bot.set_my_commands(main_menu_commands)
+dp.startup.register(set_main_menu)
+
+
 async def quest_menu(bot: Bot):
     main_menu_commands = [
         BotCommand(command='/back', description='Возвращает в начало квеста'),
@@ -153,9 +164,10 @@ async def handle_answer(message: types.Message, state: FSMContext, next_state: S
 
     if user_input == "/start":
         print(f"Пользователь вышел из теста {message.from_user.id}: {user_input}.")
-        await message.answer("Вы вышли из прохождения теста командой старт")
+        await set_main_menu(bot)
         await state.clear()
-
+        await message.answer("Вы вышли из прохождения теста командой старт\nОцените продуманность кода по 10 бальной шкале\nНапишите цифру от 1 до 10.")
+        await message.answer("Для того чтобы заново начать квест напишите /quest.")
         return
     user_answers[message.from_user.id].append(user_input)
     await ask_question(message, state, next_state, question_index + 1)
@@ -163,25 +175,35 @@ async def handle_answer(message: types.Message, state: FSMContext, next_state: S
 
 @dp.message(Command(commands='back'))
 async def back_command(message: Message, state: FSMContext):
-    user_id = message.from_user.id
-    user_answers[user_id] = []
-    await message.answer(
-        text='Возвращаю к началу теста...',
-        reply_markup=ReplyKeyboardRemove(),
-    )
+    current_state = await state.get_state()
 
-    await ask_question(message, state, TestStates.Q1, 0)
+    if current_state and current_state.startswith("TestStates"):
+        user_id = message.from_user.id
+        user_answers[user_id] = []
+        await message.answer(
+            text='Возвращаю к началу теста...',
+            reply_markup=ReplyKeyboardRemove(),
+        )
+        await ask_question(message, state, TestStates.Q1, 0)
+    else:
+        await message.answer("Команда /back доступна только во время квеста.")
+
 
 @dp.message(Command(commands='exit'))
 async def exit_command(message: Message, state: FSMContext):
-    user_id = message.from_user.id
-    user_answers.pop(user_id, None)
-    await state.clear()
-    await clear_menu(bot)
-    await message.answer(
-        text="Вы вышли из прохождения теста.",
-        reply_markup=ReplyKeyboardRemove(),
-    )
+    current_state = await state.get_state()
+
+    if current_state and current_state.startswith("TestStates"):
+        user_id = message.from_user.id
+        user_answers.pop(user_id, None)
+        await state.clear()
+        await set_main_menu(bot)
+        await message.answer(
+            text="Вы вышли из прохождения теста. Меню восстановлено.",
+            reply_markup=ReplyKeyboardRemove(),
+        )
+    else:
+        await message.answer("Команда /exit доступна только во время квеста.")
 
 
 
@@ -228,15 +250,13 @@ async def process_q10(message: types.Message, state: FSMContext):
     correct_options = questions[9]["options"]
 
     if user_input not in correct_options:
-
         print(f"Некорректный ответ от пользователя {message.from_user.id}: {user_input}.")
-
         await message.answer("Пожалуйста, выберите один из предложенных вариантов ответа.")
         return
 
     user_answers[message.from_user.id].append(message.text)
     await state.clear()
-    await clear_menu(bot)
+    await set_main_menu(bot)
     await calculate_result(message)
 
 

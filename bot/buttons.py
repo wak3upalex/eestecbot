@@ -75,6 +75,10 @@ async def process_department_choice(message: Message, state: FSMContext):
             text="HR отдел - это работа с членами сообщества и участниками мероприятий. Помощь в адаптации новым мемберам, мотивация участников и организация мероприятий и выездов - всем этим занимаются в HR. Если ты активный, общительный и хочешь научиться организовывать мероприятия и создавать комфортную рабочую атмосферу, то тебе сюда!",
             reply_markup=ReplyKeyboardRemove(),
         )
+    elif user_input == '/start':
+        print(f"Пользователь вышел из about_us {message.from_user.id}: {user_input}.")
+        await message.answer("Вы вышли из /about_us", reply_markup=ReplyKeyboardRemove())
+        await state.clear()
     else:
         await message.answer(
             text="Пожалуйста, выберите один из предложенных отделов используя кнопочки.",
@@ -82,16 +86,4 @@ async def process_department_choice(message: Message, state: FSMContext):
         )
         return
 
-
     await state.clear()
-
-#menu
-async def set_main_menu(bot:Bot):
-    main_menu_commands = [
-        BotCommand(command='/start',description='Ah Shit,here we go again.'),
-        BotCommand(command='/help',description= 'Справка по работе бота'),
-        BotCommand(command='/about_us',description='Команда, которая расскажет тебе про наши отделы'),
-        BotCommand(command='/quest',description= 'Пройди квест для определения своего отдела'),
-    ]
-    await bot.set_my_commands(main_menu_commands)
-dp.startup.register(set_main_menu)
