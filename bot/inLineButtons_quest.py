@@ -7,6 +7,7 @@ from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import KeyboardButton, ReplyKeyboardRemove, Message
+from aiogram.utils import keyboard
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bot import bot, dp
 
