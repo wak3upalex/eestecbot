@@ -40,10 +40,10 @@ async def about_us(message:Message, state: FSMContext):
 # Обработчик для всех департаментов
 @dp.message(StateFilter(AboutUsStates.WaitingForDepartmentChoice))
 async def process_department_choice(message: Message, state: FSMContext):
-    user_input = message.text
+    department = message.text
 
 
-    if user_input == 'Board':
+    if department == 'Board':
         await message.answer(
             text="*Board* состоит из руководителей нашего замечательного сообщества\! В него входят:\n"
                  "• Chairperson \(Руководитель Сообщества\)\n"
@@ -57,28 +57,28 @@ async def process_department_choice(message: Message, state: FSMContext):
             reply_markup=ReplyKeyboardRemove(),
             parse_mode=ParseMode.MARKDOWN_V2
         )
-    elif user_input == 'IT':
+    elif department == 'IT':
         await message.answer(
             text="IT-отдел - это про сплоченное сообщество программистов, которые стремятся развивать свои soft и hard skills. Отдел предоставляет среду для командной разработки и развития навыков, необходимых для работы в IT-компании. Если ты любишь программирование, хочешь учиться и развиваться самостоятельно, а также вести активную студенческую жизнь, то смело выбирай IT!",
             reply_markup=ReplyKeyboardRemove(),
         )
-    elif user_input == 'PR':
+    elif department == 'PR':
         await message.answer(
             text="PR отдел формирует имидж сообщества в медиа, отвечает за насыщенный контент и визуальную составляющую. Ребята повышают узнаваемость и популярность сообщества, а также способствуют его развитию и росту. Если ты любишь социальные сети и творчество, умеешь работать в команде и всегда имеешь в запасе парочку клевых идей, то PR - для тебя!",
             reply_markup=ReplyKeyboardRemove(),
         )
-    elif user_input == 'CR':
+    elif department == 'CR':
         await message.answer(
             text="CR отдел - это работа с партнёрами: поиск предложений и возможных контактов, а так же проведение переговоров. Эти ребята поддерживают каждое событие в ячейке: от международных мероприятий до неформальных встреч. Если ты любишь психологию, хочешь научиться договариваться с людьми и готов идти напролом, то CR - идеальный вариант.",
             reply_markup=ReplyKeyboardRemove(),
         )
-    elif user_input == 'HR':
+    elif department == 'HR':
         await message.answer(
             text="HR отдел - это работа с членами сообщества и участниками мероприятий. Помощь в адаптации новым мемберам, мотивация участников и организация мероприятий и выездов - всем этим занимаются в HR. Если ты активный, общительный и хочешь научиться организовывать мероприятия и создавать комфортную рабочую атмосферу, то тебе сюда!",
             reply_markup=ReplyKeyboardRemove(),
         )
-    elif user_input == "/start":
-        print(f"Пользователь вышел из about_us {message.from_user.id}: {user_input}.")
+    elif department == "/start":
+        print(f"Пользователь вышел из about_us {message.from_user.id}: {department}.")
         await message.answer("Вы вышли из /about_us", reply_markup=ReplyKeyboardRemove())
         await state.clear()
     else:
