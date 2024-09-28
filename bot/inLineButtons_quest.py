@@ -169,7 +169,7 @@ async def back_command(message: Message, state: FSMContext):
         text='Возвращаю к началу теста...',
         reply_markup=ReplyKeyboardRemove(),
     )
-    # Возвращаем пользователя к первому вопросу
+
     await ask_question(message, state, TestStates.Q1, 0)
 
 @dp.message(Command(commands='exit'))
