@@ -138,12 +138,6 @@ async def handle_answer(message: types.Message, state: FSMContext, next_state: S
     if user_input not in correct_options:
         print(f"Некорректный ответ от пользователя {message.from_user.id}: {user_input}.")
         await message.answer("Пожалуйста, выберите один из предложенных вариантов ответа.")
-
-    if user_input == "/start":
-        print(f"Пользователь вышел из теста {message.from_user.id}: {user_input}.")
-        await message.answer("Вы вышли из прохождения теста командой старт")
-        await state.clear()
-
         return
     user_answers[message.from_user.id].append(user_input)
     await ask_question(message, state, next_state, question_index + 1)
