@@ -167,7 +167,10 @@ async def handle_answer(message: types.Message, state: FSMContext, next_state: S
         await set_main_menu(bot)
         await state.clear()
         await message.answer("Вы вышли из прохождения теста командой старт\nОцените продуманность кода по 10 бальной шкале\nНапишите цифру от 1 до 10.")
-        await message.answer("Для того чтобы заново начать квест напишите /quest.")
+        await message.answer(
+            text="Для того чтобы заново начать квест напишите /quest.",
+            reply_markup=ReplyKeyboardRemove()
+        )
         return
     user_answers[message.from_user.id].append(user_input)
     await ask_question(message, state, next_state, question_index + 1)
