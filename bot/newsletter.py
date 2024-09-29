@@ -37,9 +37,10 @@ async def process_SendToAll_command(message: Message, state: FSMContext):
                     await message.answer("У Вас недостаточно прав")
 
 @dp.message(newsletter1States.waiting_for_message1)
-async def message_get1(message: Message, state:FSMContext):
+async def message_get1(message: Message, state: FSMContext):
     folder_path = 'users'
     file_names = []
+    user_count = 0  # Счетчик пользователей
     for file_name in os.listdir(folder_path):
         if os.path.isfile(os.path.join(folder_path, file_name)):
             file_names.append(file_name)
@@ -49,26 +50,33 @@ async def message_get1(message: Message, state:FSMContext):
             templates = json.load(f)
         chat = str(templates["id"])
         if "role" in templates:
-            if templates["role"] == "outmem":
-                if message.text is not None:
+            if templates["role"] == "outmem" or templates["role"] == "Admin":
+                if message.text:
                     await bot.send_message(chat, message.text)
-                elif message.photo is not None:
+                    user_count += 1
+                elif message.photo :
                     await bot.send_photo(chat_id=chat, photo=message.photo[-1].file_id,
                                          caption=message.caption)
-                elif message.document is not None:
+                    user_count += 1
+                elif message.document:
                     await bot.send_document(chat_id=chat, document=message.document.file_id,
                                             caption=message.caption)
+                    user_count += 1
         else:
-            if message.text is not None:
+            if message.text:
                 await bot.send_message(chat, message.text)
-            elif message.photo is not None:
-                await bot.send_photo(chat_id=chat, photo=message.photo[-1].file_id,
-                                     caption=message.caption)
-            elif message.document is not None:
-                await bot.send_document(chat_id=chat, document=message.document.file_id,
-                                        caption=message.caption)
+                user_count += 1
+            elif message.photo:
+                await bot.send_photo(chat_id=chat, photo=message.photo[-1].file_id, caption=message.caption)
+                user_count += 1
+            elif message.document:
+                await bot.send_document(chat_id=chat, document=message.document.file_id, caption=message.caption)
+                user_count += 1
 
-
+    # Отправляем админу информацию о количестве получателей
+    await message.answer(f"Сообщение было отправлено {user_count} пользователям.")
+    # Очищаем состояние
+    await state.clear()
 
 
 
