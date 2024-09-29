@@ -166,7 +166,8 @@ async def handle_answer(message: types.Message, state: FSMContext, next_state: S
         print(f"Пользователь вышел из теста {message.from_user.id}: {user_input}.")
         await set_main_menu(bot)
         await state.clear()
-        await message.answer("Вы вышли из прохождения теста командой старт\nОцените продуманность кода по 10 бальной шкале\nНапишите цифру от 1 до 10.")
+        # Now this is commented because doesn't work properly. It is possible to include this idea for possible /feedback command
+        # await message.answer("Вы вышли из прохождения теста командой старт\nОцените продуманность кода по 10 бальной шкале\nНапишите цифру от 1 до 10.")
         await message.answer(
             text="Для того чтобы заново начать квест напишите /quest.",
             reply_markup=ReplyKeyboardRemove()
