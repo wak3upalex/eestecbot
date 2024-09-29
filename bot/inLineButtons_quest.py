@@ -141,7 +141,7 @@ async def clear_menu(bot: Bot):
 @dp.message(Command("quest"))
 async def start_test(message: types.Message, state: FSMContext):
     await quest_menu(bot)
-    await message.answer("Правила: Вам будет задано 10 вопросов с вариантами ответов. Выберите один из вариантов.")
+    await message.answer("Правила: Вам будет задано 10 вопросов с вариантами ответов. Выберите один из вариантов.\n/back – Возвращает в начало квеста\n/exit – Выходит из состояния квеста")
     user_answers[message.from_user.id] = []
     await ask_question(message, state, TestStates.Q1, 0)
 
