@@ -1,5 +1,6 @@
 import json
 import os
+import logging
 
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -8,26 +9,40 @@ from aiogram.types import Message
 
 from bot import bot, dp
 
+# Создание логгера для текущего модуля
+logger = logging.getLogger(__name__)
+
 
 class newsletter1States(StatesGroup):
     waiting_for_message1 = State()
+
 
 @dp.message(Command(commands="SendToAll"))  # Обработка команды на запуск рассылки
 async def process_SendToAll_command(message: Message, state: FSMContext):
     folder_path = 'users'
     file_names = []
-    for file_name in os.listdir(folder_path):
-        if os.path.isfile(os.path.join(folder_path, file_name)):
-            file_names.append(file_name)
+    logger.info(f"Пользователь {message.from_user.username} ({message.from_user.id}) запустил команду /SendToAll")
+
+    try:
+        for file_name in os.listdir(folder_path):
+            if os.path.isfile(os.path.join(folder_path, file_name)):
+                file_names.append(file_name)
+    except FileNotFoundError:
+        logger.error(f"Папка {folder_path} не найдена!")
+        await message.answer(f"Ошибка: папка {folder_path} не найдена.")
+        return
 
     for i in file_names:
         with open("users/" + i) as f:
             templates = json.load(f)
-        if message.from_user.id == templates["id"]:  # Поиск админа по id
-            if "role" in templates and templates["role"] == "Admin":  # Проверка роли
+        if message.from_user.id == templates["id"]:
+            if "role" in templates and templates["role"] == "Admin":
+                logger.info(f"Пользователь {message.from_user.username} имеет роль Admin")
                 await message.answer("Напишите текст для пользователей")
                 await state.set_state(newsletter1States.waiting_for_message1)
             else:
+                logger.warning(
+                    f"Пользователь {message.from_user.username} ({message.from_user.id}) пытался использовать рассылку, но не имеет прав")
                 await message.answer("У Вас недостаточно прав")
 
 
@@ -36,11 +51,18 @@ async def message_get1(message: Message, state: FSMContext):
     folder_path = 'users'
     file_names = []
     user_count = 0
-    sent_messages = {}  # Словарь для хранения ID сообщений. Нужен для дальнейшего функционала удаления сообщений
+    sent_messages = {}
 
-    for file_name in os.listdir(folder_path):
-        if os.path.isfile(os.path.join(folder_path, file_name)):
-            file_names.append(file_name)
+    logger.info(f"Начало рассылки сообщений от пользователя {message.from_user.username} ({message.from_user.id})")
+
+    try:
+        for file_name in os.listdir(folder_path):
+            if os.path.isfile(os.path.join(folder_path, file_name)):
+                file_names.append(file_name)
+    except FileNotFoundError:
+        logger.error(f"Папка {folder_path} не найдена!")
+        await message.answer(f"Ошибка: папка {folder_path} не найдена.")
+        return
 
     for i in file_names:
         with open("users/" + i) as f:
@@ -48,225 +70,40 @@ async def message_get1(message: Message, state: FSMContext):
         chat = str(templates["id"])
         sent_message = None
 
-        # Отправка сообщения пользователям с ролями "outmem" и "Admin"
-        if "role" in templates and (templates["role"] == "outmem" or templates["role"] == "Admin"):
-            if message.text:
-                sent_message = await bot.send_message(chat, message.text)
-            elif message.photo:
-                sent_message = await bot.send_photo(chat_id=chat, photo=message.photo[-1].file_id,
-                                                    caption=message.caption)
-            elif message.document:
-                sent_message = await bot.send_document(chat_id=chat, document=message.document.file_id,
-                                                       caption=message.caption)
+        try:
+            # Отправка сообщения пользователям с ролями "outmem" и "Admin"
+            if "role" in templates and (templates["role"] == "outmem" or templates["role"] == "Admin"):
+                if message.text:
+                    sent_message = await bot.send_message(chat, message.text)
+                elif message.photo:
+                    sent_message = await bot.send_photo(chat_id=chat, photo=message.photo[-1].file_id,
+                                                        caption=message.caption)
+                elif message.document:
+                    sent_message = await bot.send_document(chat_id=chat, document=message.document.file_id,
+                                                           caption=message.caption)
 
-        # Отправка пользователям без роли
-        elif "role" not in templates:
-            if message.text:
-                sent_message = await bot.send_message(chat, message.text)
-            elif message.photo:
-                sent_message = await bot.send_photo(chat_id=chat, photo=message.photo[-1].file_id,
-                                                    caption=message.caption)
-            elif message.document:
-                sent_message = await bot.send_document(chat_id=chat, document=message.document.file_id,
-                                                       caption=message.caption)
+            # Отправка пользователям без роли
+            elif "role" not in templates:
+                if message.text:
+                    sent_message = await bot.send_message(chat, message.text)
+                elif message.photo:
+                    sent_message = await bot.send_photo(chat_id=chat, photo=message.photo[-1].file_id,
+                                                        caption=message.caption)
+                elif message.document:
+                    sent_message = await bot.send_document(chat_id=chat, document=message.document.file_id,
+                                                           caption=message.caption)
 
-        # Сохранение ID сообщения для удаления
-        if sent_message:
-            sent_messages[chat] = sent_message.message_id
-            user_count += 1
+            # Сохранение ID сообщения для удаления
+            if sent_message:
+                sent_messages[chat] = sent_message.message_id
+                logger.info(f"Сообщение отправлено пользователю {chat}")
+                user_count += 1
+        except Exception as e:
+            logger.error(f"Ошибка при отправке сообщения пользователю {chat}: {e}")
 
     # Сохранение информации о последних отправленных сообщениях
     await state.update_data(sent_messages=sent_messages)
-    print(sent_messages)
+    logger.info(f"Сообщения успешно отправлены {user_count} пользователям")
     await message.answer(f"Сообщение было отправлено {user_count} пользователям.")
     await state.clear()
 
-
-
-"""
-class newsletterStates(StatesGroup):
-    waiting_for_message = State()
-
-@dp.message(Command(commands="SendToEESTECers")) # we implement the command to send messages only to EESTECers
-async def process_SendEESTECers_command(message: Message, state: FSMContext):
-    folder_path = 'users'
-    file_names = []
-    for file_name in os.listdir(folder_path):
-        if os.path.isfile(os.path.join(folder_path, file_name)):
-            file_names.append(file_name) #
-
-    for i in file_names:
-        with open("users/" + i) as f:
-            templates = json.load(f)
-        if message.from_user.id == templates["id"]:
-            if "role" in templates:
-                if templates["role"] == "LD" or templates["role"] == "VC" or templates["role"] == "Admin":
-                    await message.answer("Напишите текст для пользователей")
-                    await state.set_state(newsletterStates.waiting_for_message)
-                else:
-                    await message.answer("У Вас недостаточно прав")
-
-@dp.message(newsletterStates.waiting_for_message)
-async def message_get(message: Message, state:FSMContext):
-    folder_path = 'users'
-    file_names = []
-    for file_name in os.listdir(folder_path):
-        if os.path.isfile(os.path.join(folder_path, file_name)):
-            file_names.append(file_name)
-
-    for i in file_names:
-        with open("users/" + i) as f:
-            templates = json.load(f)
-        chat = str(templates["id"])
-        if "role" in templates:
-            if templates["role"] != "outmem":
-                if message.text is not None:
-                    await bot.send_message(chat, message.text)
-                elif message.photo is not None:
-                    await bot.send_photo(chat_id=chat, photo=message.photo[-1].file_id,
-                                         caption=message.caption)
-                elif message.document is not None:
-                    await bot.send_document(chat_id=chat, document=message.document.file_id,
-                                            caption=message.caption)
-
-
-class newsletter1States(StatesGroup):
-    waiting_for_message1 = State()
-
-@dp.message(Command(commands="SendToAll"))
-async def process_SendToAll_command(message: Message, state: FSMContext):
-    folder_path = 'users'
-    file_names = []
-    for file_name in os.listdir(folder_path):
-        if os.path.isfile(os.path.join(folder_path, file_name)):
-            file_names.append(file_name)
-
-    for i in file_names:
-        with open("users/" + i) as f:
-            templates = json.load(f)
-        if message.from_user.id == templates["id"]:
-            if "role" in templates:
-                if templates["role"] == "PRL" or templates["role"] == "Admin":
-                    await message.answer("Напишите текст для пользователей")
-                    await state.set_state(newsletter1States.waiting_for_message1)
-                else:
-                    await message.answer("У Вас недостаточно прав")
-
-@dp.message(newsletter1States.waiting_for_message1)
-async def message_get1(message: Message, state:FSMContext):
-    folder_path = 'users'
-    file_names = []
-    for file_name in os.listdir(folder_path):
-        if os.path.isfile(os.path.join(folder_path, file_name)):
-            file_names.append(file_name)
-
-    for i in file_names:
-        with open("users/" + i) as f:
-            templates = json.load(f)
-        chat = str(templates["id"])
-        if "role" in templates:
-            if templates["role"] == "outmem":
-                if message.text is not None:
-                    await bot.send_message(chat, message.text)
-                elif message.photo is not None:
-                    await bot.send_photo(chat_id=chat, photo=message.photo[-1].file_id,
-                                         caption=message.caption)
-                elif message.document is not None:
-                    await bot.send_document(chat_id=chat, document=message.document.file_id,
-                                            caption=message.caption)
-        else:
-            if message.text is not None:
-                await bot.send_message(chat, message.text)
-            elif message.photo is not None:
-                await bot.send_photo(chat_id=chat, photo=message.photo[-1].file_id,
-                                     caption=message.caption)
-            elif message.document is not None:
-                await bot.send_document(chat_id=chat, document=message.document.file_id,
-                                        caption=message.caption)
-
-class newsletter2States(StatesGroup):
-    waiting_for_message2 = State()
-    waiting_for_message3 = State()
-    waiting_for_message4 = State()
-mrole = ""
-@dp.message(Command(commands="SendToTeam"))
-async def process_SendToTeam_command(message: Message, state: FSMContext):
-    folder_path = 'users'
-    file_names = []
-    global mrole
-    for file_name in os.listdir(folder_path):
-        if os.path.isfile(os.path.join(folder_path, file_name)):
-            file_names.append(file_name)
-
-    for i in file_names:
-        with open("users/" + i) as f:
-            templates = json.load(f)
-        if message.from_user.id == templates["id"]:
-            if "role" in templates:
-                if templates["role"] == "PRL" or templates["role"] == "ITL" or templates["role"] == "CRL" or templates["role"] == "HRL":
-                    mrole=templates["role"]
-                    await message.answer("Напишите текст для пользователей")
-                    await state.set_state(newsletter2States.waiting_for_message2)
-                elif templates["role"] == "Admin":
-                    await message.answer("Какой команде хотите написать?\n Введите первы две заглавные буквы команды (пример: PR)")
-                    await state.set_state(newsletter2States.waiting_for_message3)
-                else:
-                    await message.answer("У Вас недостаточно прав")
-
-@dp.message(newsletter2States.waiting_for_message2)
-async def message_get2(message: Message, state:FSMContext):
-    folder_path = 'users'
-    file_names = []
-    global mrole
-    for file_name in os.listdir(folder_path):
-        if os.path.isfile(os.path.join(folder_path, file_name)):
-            file_names.append(file_name)
-
-    for i in file_names:
-        with open("users/" + i) as f:
-            templates = json.load(f)
-        chat = str(templates["id"])
-        if "role" in templates:
-            if templates["role"] == mrole[0] + mrole[1] or (templates["role"] == "Admin" and (mrole[0] + mrole[1]) == "IT"):
-                if message.text is not None:
-                    await bot.send_message(chat, message.text)
-                elif message.photo is not None:
-                    await bot.send_photo(chat_id=chat, photo=message.photo[-1].file_id,
-                                         caption=message.caption)
-                elif message.document is not None:
-                    await bot.send_document(chat_id=chat, document=message.document.file_id,
-                                            caption=message.caption)
-
-
-@dp.message(newsletter2States.waiting_for_message3)
-async def message_get3(message: Message, state:FSMContext):
-    folder_path = 'users'
-    file_names = []
-    mrole = message.text
-    await message.answer("Напишите текст для пользователей")
-    await state.set_state(newsletter2States.waiting_for_message4)
-
-@dp.message(newsletter2States.waiting_for_message4)
-async def message_get4(message: Message, state:FSMContext):
-    folder_path = 'users'
-    file_names = []
-    global mrole
-    for file_name in os.listdir(folder_path):
-        if os.path.isfile(os.path.join(folder_path, file_name)):
-            file_names.append(file_name)
-
-    for i in file_names:
-        with open("users/" + i) as f:
-            templates = json.load(f)
-        chat = str(templates["id"])
-        if "role" in templates:
-            if templates["role"] == mrole[0] + mrole[1] or (templates["role"] == "Admin" and (mrole[0] + mrole[1]) == "IT"):
-                if message.text is not None:
-                    await bot.send_message(chat, message.text)
-                elif message.photo is not None:
-                    await bot.send_photo(chat_id=chat, photo=message.photo[-1].file_id,
-                                         caption=message.caption)
-                elif message.document is not None:
-                    await bot.send_document(chat_id=chat, document=message.document.file_id,
-                                            caption=message.caption)
-"""
