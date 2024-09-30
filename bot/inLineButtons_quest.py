@@ -2,11 +2,11 @@ import json
 import logging
 import os
 
-from aiogram import types
+from aiogram import types, Bot
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import KeyboardButton, ReplyKeyboardRemove
+from aiogram.types import KeyboardButton, ReplyKeyboardRemove, Message, BotCommand
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from bot import bot, dp
 
@@ -116,9 +116,32 @@ team_descriptions ={
 
 user_answers = {}
 
+async def set_main_menu(bot:Bot):
+    main_menu_commands = [
+        BotCommand(command='/start',description='Ah Shit,here we go again.'),
+        BotCommand(command='/help',description= 'Справка по работе бота'),
+        BotCommand(command='/about_us',description='Команда, которая расскажет тебе про наши отделы'),
+        BotCommand(command='/quest',description= 'Пройди квест для определения своего отдела'),
+    ]
+    await bot.set_my_commands(main_menu_commands)
+dp.startup.register(set_main_menu)
+
+
+async def quest_menu(bot: Bot):
+    main_menu_commands = [
+        BotCommand(command='/back', description='Возвращает в начало квеста'),
+        BotCommand(command='/exit', description='Выходит из состояния квеста')
+    ]
+    await bot.set_my_commands(main_menu_commands)
+
+async def clear_menu(bot: Bot):
+    await bot.set_my_commands([])
+
+
 @dp.message(Command("quest"))
 async def start_test(message: types.Message, state: FSMContext):
-    await message.answer("Правила: Вам будет задано 10 вопросов с вариантами ответов. Выберите один из вариантов.")
+    await quest_menu(bot)
+    await message.answer("Правила: Вам будет задано 10 вопросов с вариантами ответов. Выберите один из вариантов.\n/back – Возвращает в начало квеста\n/exit – Выходит из состояния квеста")
     user_answers[message.from_user.id] = []
     await ask_question(message, state, TestStates.Q1, 0)
 
@@ -138,9 +161,56 @@ async def handle_answer(message: types.Message, state: FSMContext, next_state: S
     if user_input not in correct_options:
         print(f"Некорректный ответ от пользователя {message.from_user.id}: {user_input}.")
         await message.answer("Пожалуйста, выберите один из предложенных вариантов ответа.")
+
+    if user_input == "/start":
+        print(f"Пользователь вышел из теста {message.from_user.id}: {user_input}.")
+        await set_main_menu(bot)
+        await state.clear()
+        # Now this is commented because doesn't work properly. It is possible to include this idea for possible /feedback command
+        # await message.answer("Вы вышли из прохождения теста командой старт\nОцените продуманность кода по 10 бальной шкале\nНапишите цифру от 1 до 10.")
+        await message.answer(
+            text="Для того чтобы заново начать квест напишите /quest.",
+            reply_markup=ReplyKeyboardRemove()
+        )
         return
     user_answers[message.from_user.id].append(user_input)
     await ask_question(message, state, next_state, question_index + 1)
+
+
+@dp.message(Command(commands='back'))
+async def back_command(message: Message, state: FSMContext):
+    current_state = await state.get_state()
+
+    if current_state and current_state.startswith("TestStates"):
+        user_id = message.from_user.id
+        user_answers[user_id] = []
+        await message.answer(
+            text='Возвращаю к началу теста...',
+            reply_markup=ReplyKeyboardRemove(),
+        )
+        await ask_question(message, state, TestStates.Q1, 0)
+    else:
+        await message.answer("Команда /back доступна только во время квеста.")
+
+
+@dp.message(Command(commands='exit'))
+async def exit_command(message: Message, state: FSMContext):
+    current_state = await state.get_state()
+
+    if current_state and current_state.startswith("TestStates"):
+        user_id = message.from_user.id
+        user_answers.pop(user_id, None)
+        await state.clear()
+        await set_main_menu(bot)
+        await message.answer(
+            text="Вы вышли из прохождения теста. Меню восстановлено.",
+            reply_markup=ReplyKeyboardRemove(),
+        )
+    else:
+        await message.answer("Команда /exit доступна только во время квеста.")
+
+
+
 @dp.message(StateFilter(TestStates.Q1))
 async def process_q1(message: types.Message, state: FSMContext):
     await handle_answer(message, state, TestStates.Q2, 0)
@@ -184,14 +254,13 @@ async def process_q10(message: types.Message, state: FSMContext):
     correct_options = questions[9]["options"]
 
     if user_input not in correct_options:
-
         print(f"Некорректный ответ от пользователя {message.from_user.id}: {user_input}.")
-
         await message.answer("Пожалуйста, выберите один из предложенных вариантов ответа.")
         return
 
     user_answers[message.from_user.id].append(message.text)
     await state.clear()
+    await set_main_menu(bot)
     await calculate_result(message)
 
 
