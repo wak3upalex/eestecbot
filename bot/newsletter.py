@@ -17,67 +17,101 @@ import json
 class newsletter1States(StatesGroup):
     waiting_for_message1 = State()
 
-@dp.message(Command(commands="SendToAll")) #We are implementing the function of sending messages to everyone
+
+@dp.message(Command(commands="SendToAll"))  # Обработка команды на запуск рассылки
 async def process_SendToAll_command(message: Message, state: FSMContext):
     folder_path = 'users'
     file_names = []
     for file_name in os.listdir(folder_path):
         if os.path.isfile(os.path.join(folder_path, file_name)):
-            file_names.append(file_name) #getting all file names in a folder
+            file_names.append(file_name)
 
     for i in file_names:
         with open("users/" + i) as f:
             templates = json.load(f)
-        if message.from_user.id == templates["id"]:#search by user, by files to obtain information about the user
-            if "role" in templates:
-                if templates["role"] == "Admin": # проверяем его уровень доступа
-                    await message.answer("Напишите текст для пользователей")
-                    await state.set_state(newsletter1States.waiting_for_message1)
-                else:
-                    await message.answer("У Вас недостаточно прав")
+        if message.from_user.id == templates["id"]:  # Поиск админа по id
+            if "role" in templates and templates["role"] == "Admin":  # Проверка роли
+                await message.answer("Напишите текст для пользователей")
+                await state.set_state(newsletter1States.waiting_for_message1)
+            else:
+                await message.answer("У Вас недостаточно прав")
 
-@dp.message(newsletter1States.waiting_for_message1)
+
+@dp.message(newsletter1States.waiting_for_message1)  # Отправка сообщения пользователям
 async def message_get1(message: Message, state: FSMContext):
     folder_path = 'users'
     file_names = []
-    user_count = 0  # Счетчик пользователей
+    user_count = 0
+    sent_messages = {}  # Словарь для хранения ID сообщений
+
     for file_name in os.listdir(folder_path):
         if os.path.isfile(os.path.join(folder_path, file_name)):
             file_names.append(file_name)
 
-    for i in file_names:# sending messages to all users in a folder
+    for i in file_names:
         with open("users/" + i) as f:
             templates = json.load(f)
         chat = str(templates["id"])
-        if "role" in templates:
-            if templates["role"] == "outmem" or templates["role"] == "Admin":
-                if message.text:
-                    await bot.send_message(chat, message.text)
-                    user_count += 1
-                elif message.photo :
-                    await bot.send_photo(chat_id=chat, photo=message.photo[-1].file_id,
-                                         caption=message.caption)
-                    user_count += 1
-                elif message.document:
-                    await bot.send_document(chat_id=chat, document=message.document.file_id,
-                                            caption=message.caption)
-                    user_count += 1
-        else:
-            if message.text:
-                await bot.send_message(chat, message.text)
-                user_count += 1
-            elif message.photo:
-                await bot.send_photo(chat_id=chat, photo=message.photo[-1].file_id, caption=message.caption)
-                user_count += 1
-            elif message.document:
-                await bot.send_document(chat_id=chat, document=message.document.file_id, caption=message.caption)
-                user_count += 1
+        sent_message = None
 
-    # Отправляем админу информацию о количестве получателей
+        # Отправка сообщения пользователям с ролями "outmem" и "Admin"
+        if "role" in templates and (templates["role"] == "outmem" or templates["role"] == "Admin"):
+            if message.text:
+                sent_message = await bot.send_message(chat, message.text)
+            elif message.photo:
+                sent_message = await bot.send_photo(chat_id=chat, photo=message.photo[-1].file_id,
+                                                    caption=message.caption)
+            elif message.document:
+                sent_message = await bot.send_document(chat_id=chat, document=message.document.file_id,
+                                                       caption=message.caption)
+
+        # Отправка пользователям без роли
+        elif "role" not in templates:
+            if message.text:
+                sent_message = await bot.send_message(chat, message.text)
+            elif message.photo:
+                sent_message = await bot.send_photo(chat_id=chat, photo=message.photo[-1].file_id,
+                                                    caption=message.caption)
+            elif message.document:
+                sent_message = await bot.send_document(chat_id=chat, document=message.document.file_id,
+                                                       caption=message.caption)
+
+        # Сохранение ID сообщения для удаления
+        if sent_message:
+            sent_messages[chat] = sent_message.message_id
+            user_count += 1
+
+    # Сохранение информации о последних отправленных сообщениях
+    await state.update_data(sent_messages=sent_messages)
+    print(sent_messages)
     await message.answer(f"Сообщение было отправлено {user_count} пользователям.")
-    # Очищаем состояние
     await state.clear()
 
+
+@dp.message(Command(commands="DeleteLastMessage"))
+async def delete_last_message(message: Message, state: FSMContext):
+    # Проверка прав доступа
+    folder_path = 'users'
+    for file_name in os.listdir(folder_path):
+        with open(f"{folder_path}/{file_name}") as f:
+            templates = json.load(f)
+        if message.from_user.id == templates["id"] and templates.get("role") == "Admin":
+            # Права подтверждены, продолжаем удаление
+            state_data = await state.get_data()
+            sent_messages = state_data.get("sent_messages", {})
+
+            for chat_id, message_id in sent_messages.items():
+                try:
+                    await message.bot.delete_message(chat_id=chat_id, message_id=message_id)
+                    await message.answer("Последние сообщения удалены.")
+                except Exception as e:
+                    await message.answer(f"Не удалось удалить сообщение для пользователя {chat_id}: {e}")
+
+            await message.answer("Последние сообщения удалены.")
+            return
+
+    # Если не админ
+    await message.answer("У Вас недостаточно прав для выполнения этой команды.")
 
 
 """
