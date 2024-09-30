@@ -12,6 +12,7 @@ from bot import bot, dp
 class newsletter1States(StatesGroup):
     waiting_for_message1 = State()
 
+
 @dp.message(Command(commands="SendToAll"))  # Обработка команды на запуск рассылки
 async def process_SendToAll_command(message: Message, state: FSMContext):
     folder_path = 'users'
@@ -36,7 +37,7 @@ async def message_get1(message: Message, state: FSMContext):
     folder_path = 'users'
     file_names = []
     user_count = 0
-    sent_messages = {}  # Словарь для хранения ID сообщений. Нужен для дальнейшего функционала удаления сообщений
+    sent_messages = {}  # Словарь для хранения ID сообщений
 
     for file_name in os.listdir(folder_path):
         if os.path.isfile(os.path.join(folder_path, file_name)):
@@ -72,15 +73,15 @@ async def message_get1(message: Message, state: FSMContext):
 
         # Сохранение ID сообщения для удаления
         if sent_message:
-            sent_messages[chat] = sent_message.message_id
+            sent_messages[chat] = str(sent_message.message_id)
             user_count += 1
 
     # Сохранение информации о последних отправленных сообщениях
-    await state.update_data(sent_messages=sent_messages)
-    print(sent_messages)
+    file_chatid = open("chatid.txt", "w")
+    for i in sent_messages:
+        file_chatid.write(str(i)+ " " +str(sent_messages.get(i)) + "\n")
     await message.answer(f"Сообщение было отправлено {user_count} пользователям.")
     await state.clear()
-
 
 
 """
