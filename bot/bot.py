@@ -36,6 +36,7 @@ from reg import *
 from inLineButtons_quest import *
 from buttons import *
 from newsletter import *
+from DeleteLastMessage import *
 @dp.message(Command(commands=["start"]))
 async def start_command_handler(message: types.Message):
     # Ensure the 'users' directory exists
