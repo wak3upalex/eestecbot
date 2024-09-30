@@ -19,16 +19,17 @@ async def delete_last_message(message: Message):
         if message.from_user.id == templates["id"] and templates.get("role") == "Admin":
             # Права подтверждены, продолжаем удаление
             file_chatid = open("chatid.txt", "r")
+            countdeletemessages = 0
             for i in file_chatid:
                 chat_id = i[:i.find(" ")]
                 message_id = i[i.find(" "):]
                 try:
                     await message.bot.delete_message(chat_id=chat_id, message_id=message_id)
-                    await message.answer("Последние сообщения удалены.")
+                    countdeletemessages+=1
                 except Exception as e:
                     await message.answer(f"Не удалось удалить сообщение для пользователя {chat_id}: {e}")
 
-            await message.answer("Последние сообщения удалены.")
+            await message.answer("Последние сообщения удалены. \nКолличество удалённых сообщений: " + str(countdeletemessages))
             return
 
     # Если не админ
