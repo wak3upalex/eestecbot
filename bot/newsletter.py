@@ -1,17 +1,12 @@
-import asyncio
+import json
+import os
 
-from aiogram import Bot, Dispatcher, types, Router, F
 from aiogram.filters import Command
-from aiogram.types import Message
-from aiogram.types import FSInputFile
-import httplib2
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.filters import Command
+from aiogram.types import Message
+
 from bot import bot, dp
-import os
-import json
 
 
 class newsletter1States(StatesGroup):
